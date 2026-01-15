@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レムリア王国と創晶のギルド</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: #111;
+    color: #eee;
+}
+
+#app {
+    max-width: 800px;
+    margin: auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#screen {
+    flex: 1;
+    padding: 20px;
+    background: #181818;
+    overflow-y: auto;
+}
+
+h1 {
+    color: #ffd36b;
+}
+
+button {
+    background: #333;
+    border: none;
+    color: #fff;
+    padding: 16px 20px;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #555;
+}
+
+.choice {
+    width: 100%;
+}
+
+#status {
+    background: #222;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+#choices {
+    padding: 10px;
+    background: #222;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* スマホ用調整 */
+@media (max-width: 600px) {
+    #choices {
+        grid-template-columns: 1fr;
+    }
+
+    #screen {
+        padding: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+    <div id="screen"></div>
+</div>
+
+<script>
+let day = 1;
+let power = 10;
+
+const profile = {
+    strategy: 0,
+    development: 0,
+    sales: 0,
+    operations: 0
+};
+
+const intro = `
+<h1>レムリア王国と創晶のギルド</h1>
+<p>
+この世界では、「創晶ランプ」がすべての文明を支えている。<br>
+家を照らし、工場を動かし、都市を発展させる魔法のエネルギーだ。
+</p>
+<p>
+しかし今、創晶ランプが不足し、王国は衰退の危機にある。
+</p>
+<p>
+あなたは王から任命された <b>ギルド長</b>。<br>
+ランプを安定して供給し、王国を再び繁栄へ導かなければならない。
+</p>
+<p>
+<strong>どう考え、どう動くか</strong>によって、<br>
+あなたがどんなリーダーなのかが決まっていく。
+</p>
+<button onclick="startGame()">冒険を始める</button>
+`;
+
+const scenes = [
+{
+    text: "街が暗く、人々が困っている。まず何をする？",
+    choices: [
+        { text: "原因を調べる", tag: "strategy" },
+        { text: "工房を強化", tag: "development" },
+        { text: "商人を探す", tag: "sales" },
+        { text: "在庫を整理", tag: "operations" }
+    ]
+},
+{
+    text: "材料が足りないことが分かった。",
+    choices: [
+        { text: "供給ルートを考える", tag: "strategy" },
+        { text: "代替素材を開発", tag: "development" },
+        { text: "交渉する", tag: "sales" },
+        { text: "管理を改善", tag: "operations" }
+    ]
+},
+{
+    text: "ランプの品質が不安定だ。",
+    choices: [
+        { text: "基準を決める", tag: "strategy" },
+        { text: "設計を改良", tag: "development" },
+        { text: "高級版を売る", tag: "sales" },
+        { text: "検品を強化", tag: "operations" }
+    ]
+},
+{
+    text: "競合ギルドが現れた。",
+    choices: [
+        { text: "戦略を考える", tag: "strategy" },
+        { text: "性能を上げる", tag: "development" },
+        { text: "宣伝する", tag: "sales" },
+        { text: "コストを下げる", tag: "operations" }
+    ]
+},
+{
+    text: "注文が急増した。",
+    choices: [
+        { text: "長期計画を立てる", tag: "strategy" },
+        { text: "設備投資", tag: "development" },
+        { text: "大口を狙う", tag: "sales" },
+        { text: "現場を整える", tag: "operations" }
+    ]
+},
+{
+    text: "人手が足りない。",
+    choices: [
+        { text: "組織を設計", tag: "strategy" },
+        { text: "自動化", tag: "development" },
+        { text: "外注探し", tag: "sales" },
+        { text: "配置変更", tag: "operations" }
+    ]
+},
+{
+    text: "王に報告の時。",
+    choices: [
+        { text: "未来の計画", tag: "strategy" },
+        { text: "技術力", tag: "development" },
+        { text: "売上", tag: "sales" },
+        { text: "安定性", tag: "operations" }
+    ]
+},
+{
+    text: "トラブル発生。",
+    choices: [
+        { text: "原因分析", tag: "strategy" },
+        { text: "修理", tag: "development" },
+        { text: "顧客対応", tag: "sales" },
+        { text: "現場調整", tag: "operations" }
+    ]
+},
+{
+    text: "新市場を発見。",
+    choices: [
+        { text: "戦略立案", tag: "strategy" },
+        { text: "新製品", tag: "development" },
+        { text: "営業強化", tag: "sales" },
+        { text: "供給整備", tag: "operations" }
+    ]
+},
+{
+    text: "王国が拡大中。",
+    choices: [
+        { text: "全体戦略", tag: "strategy" },
+        { text: "技術基盤", tag: "development" },
+        { text: "市場拡大", tag: "sales" },
+        { text: "運営安定", tag: "operations" }
+    ]
+}
+];
+
+function startGame() {
+    day = 1;
+    power = 10;
+    for (let k in profile) profile[k] = 0;
+    render();
+}
+
+function render() {
+    const s = scenes[day - 1];
+    document.getElementById("screen").innerHTML = `
+        <div id="status">Day ${day}/10 ｜ 王国の力 ${power}</div>
+        <p>${s.text}</p>
+        <div id="choices"></div>
+    `;
+
+    const cdiv = document.getElementById("choices");
+    s.choices.forEach(c => {
+        const b = document.createElement("button");
+        b.className = "choice";
+        b.textContent = c.text;
+        b.onclick = () => choose(c);
+        cdiv.appendChild(b);
+    });
+}
+
+function choose(c) {
+    profile[c.tag]++;
+    power++;
+    day++;
+    if (day > 10) endGame();
+    else render();
+}
+
+function endGame() {
+    let max = Object.keys(profile).reduce((a, b) =>
+        profile[a] > profile[b] ? a : b
+    );
+
+    const map = {
+        strategy: "戦略家タイプ",
+        development: "開発者タイプ",
+        sales: "交渉家タイプ",
+        operations: "運営者タイプ"
+    };
+
+    document.getElementById("screen").innerHTML = `
+        <h1>あなたの適性</h1>
+        <b>${map[max]}</b>
+        <p>あなたはこの役割を自然に選び続けました。</p>
+        <pre>${JSON.stringify(profile, null, 2)}</pre>
+        <button onclick="startGame()">もう一度遊ぶ</button>
+    `;
+}
+
+document.getElementById("screen").innerHTML = intro;
+</script>
+
+</body>
+</html>
